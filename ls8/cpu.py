@@ -91,16 +91,22 @@ class CPU:
 
         print()
 
+    def advance_PC(self):
+        # Use bitshifting to get how many operands you use from the first two values in opcode
+        advance_value = self.ram_read(self.PC) >> 6
+        advance_value += 1
+        self.PC += advance_value
+
     # Opcode handlers
     def handle_LDI(self):
         # The value at the register specified by PC + 1 is the value at PC + 2
         self.R[self.ram_read(self.PC + 1)] = self.ram_read(self.PC + 2)
-        self.PC += 3
+        self.advance_PC()
 
     def handle_PRN(self):
         # Print the value at the register specified by PC + 1
         print(self.R[self.ram_read(self.PC + 1)])
-        self.PC += 2
+        self.advance_PC()
 
     def handle_HLT(self):
         # Halt the program, exit the emulator
@@ -109,21 +115,21 @@ class CPU:
     def handle_MUL(self):
         # Uses the ALU to multiply operands in registers specified by PC + 1 and PC + 2
         self.alu("MUL", self.ram_read(self.PC + 1), self.ram_read(self.PC + 2))
-        self.PC += 3
+        self.advance_PC()
 
     def handle_PUSH(self):
         self.R[7] -= 1
         given_register = self.ram_read(self.PC + 1)
         value_in_given_register = self.R[given_register]
         self.ram_write(self.R[7], value_in_given_register)
-        self.PC += 2
+        self.advance_PC()
 
     def handle_POP(self):
         SP_value = self.ram_read(self.R[7])
         given_register = self.ram_read(self.PC + 1)
         self.R[given_register] = SP_value
         self.R[7] += 1
-        self.PC += 2
+        self.advance_PC()
 
 
     def run(self):

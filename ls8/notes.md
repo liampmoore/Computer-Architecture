@@ -61,3 +61,13 @@
 
 ### Goal for Day 2
 - Working mult.ls8 and branch table op handlers
+
+
+### Step 10
+- System stack
+- PUSH and POP
+
+### Step 11
+- Subroutines
+- Implement CALL to jump to a subroutine
+- IMplement RET to return to the address yo uwere in before using the stack
