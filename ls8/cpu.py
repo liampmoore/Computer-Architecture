@@ -12,6 +12,10 @@ PRN = 0b01000111
 HLT = 0b00000001
 # Multiply
 MUL = 0b10100010
+# Push
+PUSH = 0b01000101
+# Pop
+POP = 0b01000110
 
 class CPU:
     """Main CPU class."""
@@ -19,17 +23,30 @@ class CPU:
     def __init__(self):
         """Construct a new CPU."""
         # CPU Registers 0 - 7
+        # R5 is reserved as the interrupt mask (IM)
+        # R6 is reserved as the interrupt status (IS)
+        # R7 is reserved as the stack pointer (SP)
         self.R = [0] * 8
+        self.R[7] = 0xF4
+    
+        # Program Counter tells us the RAM address of current instruction
+        self.PC = 0
+
+        # Flags, `00000LGE`, store less, greater, equal of two registers
+        self.FL = 0
+
         # RAM bytes 0 - 255
         self.RAM = [0] * 256
-        # Program Counter tells us the RAM address to start
-        self.PC = 0
-        # Branch table
+
+        # Branch table for opcodes
         self.branchtable = {}
         self.branchtable[LDI] = self.handle_LDI
         self.branchtable[PRN] = self.handle_PRN
         self.branchtable[HLT] = self.handle_HLT
         self.branchtable[MUL] = self.handle_MUL
+        self.branchtable[PUSH] = self.handle_PUSH
+        self.branchtable[POP] = self.handle_POP
+    
 
     def load(self, program):
         """Load a program into memory."""
@@ -93,6 +110,21 @@ class CPU:
         # Uses the ALU to multiply operands in registers specified by PC + 1 and PC + 2
         self.alu("MUL", self.ram_read(self.PC + 1), self.ram_read(self.PC + 2))
         self.PC += 3
+
+    def handle_PUSH(self):
+        self.R[7] -= 1
+        given_register = self.ram_read(self.PC + 1)
+        value_in_given_register = self.R[given_register]
+        self.ram_write(self.R[7], value_in_given_register)
+        self.PC += 2
+
+    def handle_POP(self):
+        SP_value = self.ram_read(self.R[7])
+        given_register = self.ram_read(self.PC + 1)
+        self.R[given_register] = SP_value
+        self.R[7] += 1
+        self.PC += 2
+
 
     def run(self):
         """Run the CPU."""
