@@ -2,6 +2,17 @@
 
 import sys
 
+
+"""Codes for operations"""
+# Register Immediate: Saves value at specified register
+LDI = 0b10000010
+# Print the value at specified register
+PRN = 0b01000111
+# Halt
+HLT = 0b00000001
+# Multiply
+MUL = 0b10100010
+
 class CPU:
     """Main CPU class."""
 
@@ -13,6 +24,12 @@ class CPU:
         self.RAM = [0] * 256
         # Program Counter tells us the RAM address to start
         self.PC = 0
+        # Branch table
+        self.branchtable = {}
+        self.branchtable[LDI] = self.handle_LDI
+        self.branchtable[PRN] = self.handle_PRN
+        self.branchtable[HLT] = self.handle_HLT
+        self.branchtable[MUL] = self.handle_MUL
 
     def load(self, program):
         """Load a program into memory."""
@@ -57,39 +74,34 @@ class CPU:
 
         print()
 
-    def run(self):
-        """Codes for operations"""
-        # Register Immediate: Saves value at specified register
-        LDI = 0b10000010
-        # Print the value at specified register
-        PRN = 0b01000111
-        # Halt
-        HLT = 0b00000001
-        # Multiply
-        MUL = 0b10100010
+    # Opcode handlers
+    def handle_LDI(self):
+        # The value at the register specified by PC + 1 is the value at PC + 2
+        self.R[self.ram_read(self.PC + 1)] = self.ram_read(self.PC + 2)
+        self.PC += 3
 
+    def handle_PRN(self):
+        # Print the value at the register specified by PC + 1
+        print(self.R[self.ram_read(self.PC + 1)])
+        self.PC += 2
+
+    def handle_HLT(self):
+        # Halt the program, exit the emulator
+        exit()
+
+    def handle_MUL(self):
+        # Uses the ALU to multiply operands in registers specified by PC + 1 and PC + 2
+        self.alu("MUL", self.ram_read(self.PC + 1), self.ram_read(self.PC + 2))
+        self.PC += 3
+
+    def run(self):
         """Run the CPU."""
         # Instruction Register. Read the memory address at current PC and save it at IR for reference.
         IR = self.ram_read(self.PC)
-        # Save operands of the instruction for reference
-        operand_a = self.ram_read(self.PC + 1)
-        operand_b = self.ram_read(self.PC + 2)
 
-        
-        # Perform a task based on IR
-        if IR == LDI:
-            self.R[operand_a] = operand_b
-            self.PC += 3
-        elif IR == PRN:
-            print(self.R[operand_a])
-            self.PC += 2
-        elif IR == MUL:
-            self.alu("MUL", operand_a, operand_b)
-            self.PC += 3
-        elif IR == HLT:
-            exit()
-        
-
+        # Perform an operation based on IR
+        self.branchtable[IR]()
+    
 
     def ram_read(self, MAR):
         # MAR Memory Access Register

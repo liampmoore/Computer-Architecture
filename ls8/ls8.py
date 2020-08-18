@@ -29,5 +29,7 @@ cpu = CPU()
 
 cpu.load(program)
 
-while True:
+clock = True
+
+while clock:
     cpu.run()
