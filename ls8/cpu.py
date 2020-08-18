@@ -30,7 +30,9 @@ class CPU:
         """ALU operations."""
 
         if op == "ADD":
-            self.reg[reg_a] += self.reg[reg_b]
+            self.R[reg_a] += self.R[reg_b]
+        elif op == "MUL":
+            self.R[reg_a] *= self.R[reg_b]
         #elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
@@ -63,6 +65,8 @@ class CPU:
         PRN = 0b01000111
         # Halt
         HLT = 0b00000001
+        # Multiply
+        MUL = 0b10100010
 
         """Run the CPU."""
         # Instruction Register. Read the memory address at current PC and save it at IR for reference.
@@ -79,6 +83,9 @@ class CPU:
         elif IR == PRN:
             print(self.R[operand_a])
             self.PC += 2
+        elif IR == MUL:
+            self.alu("MUL", operand_a, operand_b)
+            self.PC += 3
         elif IR == HLT:
             exit()
         
