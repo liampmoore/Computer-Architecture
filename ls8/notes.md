@@ -46,3 +46,18 @@
 
 ### Goal for Day 1
 - Print the value 8
+
+### Step 7
+- Pull in a file with sys.argv
+- Mill through that file to get your binary number substrings, keeping track of new lines and ignoring chars after hash but before newline/space
+- Use int(str, 2) to get a binary number for each str
+- Save binary numbers to RAM in order
+
+### Step 8
+- Implement the MUL handler using the alu()
+
+### Step 9
+- Refactor if else cascade into handler methods on the class with a branchtable keyed on the opcode
+
+### Goal for Day 2
+- Working mult.ls8 and branch table op handlers
