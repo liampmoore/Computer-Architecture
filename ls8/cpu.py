@@ -18,6 +18,8 @@ MUL = 0b10100010
 PUSH = 0b01000101
 # Pop
 POP = 0b01000110
+# Store
+ST = 0b10000100
 # Call a subroutine
 CALL = 0b01010000
 # Return
@@ -53,8 +55,10 @@ class CPU:
         self.branchtable[MUL] = self.handle_MUL
         self.branchtable[PUSH] = self.handle_PUSH
         self.branchtable[POP] = self.handle_POP
+        self.branchtable[ST] = self.handle_ST
         self.branchtable[CALL] = self.handle_CALL
         self.branchtable[RET] = self.handle_RET
+
     
 
     def load(self, program):
@@ -141,11 +145,18 @@ class CPU:
         self.PC = return_address
         self.R[7] += 1
 
+    def handle_ST(self):
+        value = self.R[self.PC + 2]
+        address = self.R[self.PC + 1]
+        self.ram_write(address, value)
+
 
     def run(self):
         """Run the CPU."""
         # Instruction Register. Read the memory address at current PC and save it at IR for reference.
         IR = self.ram_read(self.PC)
+
+        self.trace()
         
         # Perform an operation based on IR
         self.branchtable[IR]()
