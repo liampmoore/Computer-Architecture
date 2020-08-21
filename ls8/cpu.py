@@ -14,6 +14,8 @@ HLT = 0b00000001
 ADD = 0b10100000
 # Multiply
 MUL = 0b10100010
+# Compare
+CMP = 0b10100111
 # Push
 PUSH = 0b01000101
 # Pop
@@ -53,6 +55,7 @@ class CPU:
         self.branchtable[HLT] = self.handle_HLT
         self.branchtable[ADD] = self.handle_ADD
         self.branchtable[MUL] = self.handle_MUL
+        self.branchtable[CMP] = self.handle_CMP
         self.branchtable[PUSH] = self.handle_PUSH
         self.branchtable[POP] = self.handle_POP
         self.branchtable[ST] = self.handle_ST
@@ -80,6 +83,14 @@ class CPU:
             self.R[reg_a] += self.R[reg_b]
         elif op == "MUL":
             self.R[reg_a] *= self.R[reg_b]
+        elif op == "CMP":
+            # `00000LGE`
+            if reg_a == reg_b:
+                self.FL = 1
+            elif reg_a < reg_b:
+                self.FL = 4
+            elif reg_a > reg_b:
+                self.FL = 2
         #elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
@@ -112,6 +123,8 @@ class CPU:
         # Uses the ALU to multiply operands in registers specified by PC + 1 and PC + 2
         self.alu("MUL", self.ram_read(self.PC + 1), self.ram_read(self.PC + 2))
         
+    def handle_CMP(self):
+        self.alu("CMP", self.ram_read(self.PC + 1), self.ram_read(self.PC + 2))
 
     def handle_PUSH(self):
         self.R[7] -= 1
