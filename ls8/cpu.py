@@ -28,6 +28,10 @@ CALL = 0b01010000
 RET = 0b00010001
 # Jump, jump to address
 JMP = 0b01010100
+# Jump if equal flag is true
+JEQ = 0b01010101
+# Jump if not equal
+JNE = 0b01010110
 
 class CPU:
     """Main CPU class."""
@@ -64,6 +68,8 @@ class CPU:
         self.branchtable[CALL] = self.handle_CALL
         self.branchtable[RET] = self.handle_RET
         self.branchtable[JMP] = self.handle_JMP
+        self.branchtable[JEQ] = self.handle_JEQ
+        self.branchtable[JNE] = self.handle_JNE
 
     
 
@@ -170,6 +176,18 @@ class CPU:
         address = self.R[self.ram_read(self.PC + 1)]
         self.PC = address
 
+    def handle_JEQ(self):
+        if self.FL == 1:
+            self.handle_JMP()
+        else:
+            self.advance_PC()
+    
+    def handle_JNE(self):
+        if self.FL != 1:
+            self.handle_JMP()
+        else:
+            self.advance_PC()
+
     def run(self):
         """Run the CPU."""
         # Instruction Register. Read the memory address at current PC and save it at IR for reference.
@@ -180,7 +198,7 @@ class CPU:
         # Perform an operation based on IR
         self.branchtable[IR]()
 
-        if IR != CALL and IR != RET and IR != JMP:
+        if IR != CALL and IR != RET and IR != JMP and IR != JEQ and IR != JNE: 
             self.advance_PC()
     
     def trace(self):
