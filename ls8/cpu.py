@@ -26,6 +26,8 @@ ST = 0b10000100
 CALL = 0b01010000
 # Return
 RET = 0b00010001
+# Jump, jump to address
+JMP = 0b01010100
 
 class CPU:
     """Main CPU class."""
@@ -61,6 +63,7 @@ class CPU:
         self.branchtable[ST] = self.handle_ST
         self.branchtable[CALL] = self.handle_CALL
         self.branchtable[RET] = self.handle_RET
+        self.branchtable[JMP] = self.handle_JMP
 
     
 
@@ -163,6 +166,9 @@ class CPU:
         address = self.R[self.PC + 1]
         self.ram_write(address, value)
 
+    def handle_JMP(self):
+        address = self.R[self.ram_read(self.PC + 1)]
+        self.PC = address
 
     def run(self):
         """Run the CPU."""
@@ -174,7 +180,7 @@ class CPU:
         # Perform an operation based on IR
         self.branchtable[IR]()
 
-        if IR != CALL and IR != RET:
+        if IR != CALL and IR != RET and IR != JMP:
             self.advance_PC()
     
     def trace(self):
