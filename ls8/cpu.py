@@ -94,11 +94,11 @@ class CPU:
             self.R[reg_a] *= self.R[reg_b]
         elif op == "CMP":
             # `00000LGE`
-            if reg_a == reg_b:
+            if self.R[reg_a] == self.R[reg_b]:
                 self.FL = 1
-            elif reg_a < reg_b:
+            elif self.R[reg_a] < self.R[reg_b]:
                 self.FL = 4
-            elif reg_a > reg_b:
+            elif self.R[reg_a] > self.R[reg_b]:
                 self.FL = 2
         #elif op == "SUB": etc
         else:
@@ -112,8 +112,11 @@ class CPU:
 
     # Opcode handlers
     def handle_LDI(self):
+        
         # The value at the register specified by PC + 1 is the value at PC + 2
-        self.R[self.ram_read(self.PC + 1)] = self.ram_read(self.PC + 2)
+        value = self.ram_read(self.PC + 2)
+        register = self.ram_read(self.PC + 1)
+        self.R[register] = value
         
 
     def handle_PRN(self):
@@ -133,7 +136,9 @@ class CPU:
         self.alu("MUL", self.ram_read(self.PC + 1), self.ram_read(self.PC + 2))
         
     def handle_CMP(self):
-        self.alu("CMP", self.ram_read(self.PC + 1), self.ram_read(self.PC + 2))
+        regA = self.ram_read(self.PC + 1)
+        regB = self.ram_read(self.PC + 2)
+        self.alu("CMP", regA, regB)
 
     def handle_PUSH(self):
         self.R[7] -= 1
@@ -192,8 +197,6 @@ class CPU:
         """Run the CPU."""
         # Instruction Register. Read the memory address at current PC and save it at IR for reference.
         IR = self.ram_read(self.PC)
-
-        self.trace()
         
         # Perform an operation based on IR
         self.branchtable[IR]()
